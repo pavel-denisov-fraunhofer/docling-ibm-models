@@ -4,12 +4,13 @@
 #
 import os
 from collections.abc import Iterable
-from typing import Union
+from typing import Union, Tuple
 
 import numpy as np
 import torch
 import torchvision.transforms as T
 from PIL import Image
+import openvino as ov
 
 MODEL_CHECKPOINT_FN = "model.pt"
 DEFAULT_NUM_THREADS = 4
@@ -21,7 +22,7 @@ class LayoutPredictor:
     """
 
     def __init__(
-        self, artifact_path: str, num_threads: int = None, use_cpu_only: bool = False
+        self, artifact_path: str, num_threads: int = None, use_cpu_only: bool = False, use_ov: bool = False
     ):
         r"""
         Provide the artifact path that contains the LayoutModel file
@@ -88,7 +89,26 @@ class LayoutPredictor:
             num_threads = int(os.environ.get("OMP_NUM_THREADS", DEFAULT_NUM_THREADS))
         self._num_threads = num_threads
 
-        self.model = torch.jit.load(self._torch_fn)
+        if use_ov:
+            core = ov.Core()
+            ov_model = core.read_model("openvino_conversion/models/layout_predictor/model.xml")
+            self.model = ov.compile_model(ov_model)
+            self._predict_function = self._predict_openvino
+        else:
+            self.model = torch.jit.load(self._torch_fn)
+            self._predict_function = self._predict_torch
+
+    def _predict_torch(self, img: torch.Tensor, orig_size: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        with torch.no_grad():
+            labels, boxes, scores = self.model(img, orig_size)
+        return labels, boxes, scores
+
+    def _predict_openvino(self, img: torch.Tensor, orig_size: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        output = self.model((img, orig_size))
+        labels = torch.tensor(output[0])
+        boxes = torch.tensor(output[1])
+        scores = torch.tensor(output[2])
+        return labels, boxes, scores
 
     def info(self) -> dict:
         r"""
@@ -139,8 +159,7 @@ class LayoutPredictor:
         )
         img = transforms(page_img)[None]
         # Predict
-        with torch.no_grad():
-            labels, boxes, scores = self.model(img, orig_size)
+        labels, boxes, scores = self._predict_function(img, orig_size)
 
         # Yield output
         for label_idx, box, score in zip(labels[0], boxes[0], scores[0]):
