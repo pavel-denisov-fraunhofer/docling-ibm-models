@@ -91,7 +91,7 @@ class LayoutPredictor:
 
         if use_ov:
             core = ov.Core()
-            ov_model = core.read_model("openvino_conversion/models/layout_predictor/model.xml")
+            ov_model = core.read_model("openvino_conversion/models/layout_predictor_quantized/model.xml")
             self.model = ov.compile_model(ov_model)
             self._predict_function = self._predict_openvino
         else:
