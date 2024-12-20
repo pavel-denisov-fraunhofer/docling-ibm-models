@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "docling-ibm-models"
-version = "2.0.3"  # DO NOT EDIT, updated automatically
+version = "3.1.0"  # DO NOT EDIT, updated automatically
 description = "This package contains the AI models used by the Docling PDF conversion package"
 authors = ["Nikos Livathinos <nli@zurich.ibm.com>", "Maxim Lysak <mly@zurich.ibm.com>", "Ahmed Nassar <ahn@zurich.ibm.com>", "Christoph Auer <cau@zurich.ibm.com>", "Michele Dolfi <dol@zurich.ibm.com>", "Peter Staar <taa@zurich.ibm.com>"]
 license = "MIT"
@@ -21,20 +21,17 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9"
 torch = "^2.2.2"
 torchvision = "^0"
-numpy = [
-    { version = "^2.1.0", markers = 'python_version >= "3.13"' },
-    { version = "^1.24.4", markers = 'python_version < "3.13"' },
-]
-lxml = "^4.9.1"
+transformers = "^4.42.0"
+numpy = ">=1.24.4,<3.0.0"
 jsonlines = "^3.1.0"
 Pillow = "^10.0.0"
 tqdm = "^4.64.0"
-mean_average_precision = "^2021.4.26.0"
 opencv-python-headless = "^4.6.0.66"
 huggingface_hub = ">=0.23,<1"
+safetensors = {version=">=0.4.3,<1", extras=["torch"]}
 
 [tool.poetry.group.dev.dependencies]
 black = {extras = ["jupyter"], version = "^24.4.2"}
@@ -65,6 +62,15 @@ torchvision = [
   {markers = "sys_platform == 'darwin' and platform_machine == 'x86_64'", version = "~0.17.2"}
 ]
 
+[tool.poetry.group.constraints]
+optional = true
+
+[tool.poetry.group.constraints.dependencies]
+numpy = [
+    { version = ">=1.24.4,<3.0.0", markers = 'python_version >= "3.10"' },
+    { version = ">=1.24.4,<2.1.0", markers = 'python_version < "3.10"' },
+]
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -72,13 +78,13 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 88
-target-version = ["py310"]
+target-version = ["py39"]
 include = '\.pyi?$'
 
 [tool.isort]
 profile = "black"
 line_length = 88
-py_version=310
+py_version=39
 
 [tool.semantic_release]
 # for default values check:
@@ -92,3 +98,16 @@ branch = "main"
 parser_angular_allowed_types = "build,chore,ci,docs,feat,fix,perf,style,refactor,test"
 parser_angular_minor_types = "feat"
 parser_angular_patch_types = "fix,perf"
+
+
+# [tool.mypy]
+# pretty = true
+# no_implicit_optional = true
+# python_version = "3.10"
+#
+# [[tool.mypy.overrides]]
+# module = [
+#     "torchvision.*",
+#     "transformers.*"
+# ]
+# ignore_missing_imports = true

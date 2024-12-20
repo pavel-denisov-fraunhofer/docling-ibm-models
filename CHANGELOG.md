@@ -1,3 +1,49 @@
+## [v3.1.0](https://github.com/DS4SD/docling-ibm-models/releases/tag/v3.1.0) - 2024-12-13
+
+### Feature
+
+* Add arguments for LayoutPredictor ([#66](https://github.com/DS4SD/docling-ibm-models/issues/66)) ([`fe6a476`](https://github.com/DS4SD/docling-ibm-models/commit/fe6a476ab549eec5b75eb2296ab1182ecb8a7412))
+
+## [v3.0.0](https://github.com/DS4SD/docling-ibm-models/releases/tag/v3.0.0) - 2024-12-11
+
+### Feature
+
+* New API for models initialization with accelerators parameters. Use HF implementation for LayoutPredictor. Migrate models to safetensors format. ([#50](https://github.com/DS4SD/docling-ibm-models/issues/50)) ([`04295b2`](https://github.com/DS4SD/docling-ibm-models/commit/04295b2dd36a20f88d03b3bcc971097d0a0cd9d6))
+
+### Breaking
+
+* New API for models initialization with accelerators parameters. Use HF implementation for LayoutPredictor. Migrate models to safetensors format. ([#50](https://github.com/DS4SD/docling-ibm-models/issues/50)) ([`04295b2`](https://github.com/DS4SD/docling-ibm-models/commit/04295b2dd36a20f88d03b3bcc971097d0a0cd9d6))
+
+## [v2.0.8](https://github.com/DS4SD/docling-ibm-models/releases/tag/v2.0.8) - 2024-12-11
+
+### Fix
+
+* Remove print statements ([#63](https://github.com/DS4SD/docling-ibm-models/issues/63)) ([`da13863`](https://github.com/DS4SD/docling-ibm-models/commit/da13863034a897be96e0768671ee348a7051cf90))
+
+## [v2.0.7](https://github.com/DS4SD/docling-ibm-models/releases/tag/v2.0.7) - 2024-12-02
+
+### Fix
+
+* Improve numpy compatibility pinning ([#57](https://github.com/DS4SD/docling-ibm-models/issues/57)) ([`de2f241`](https://github.com/DS4SD/docling-ibm-models/commit/de2f241ea8577636bd72367a97691613e93e20de))
+
+## [v2.0.6](https://github.com/DS4SD/docling-ibm-models/releases/tag/v2.0.6) - 2024-11-20
+
+### Fix
+
+* Python3.9 support ([#54](https://github.com/DS4SD/docling-ibm-models/issues/54)) ([`e2b19d9`](https://github.com/DS4SD/docling-ibm-models/commit/e2b19d930279c150557af33f2b08d7abb1f47428))
+
+## [v2.0.5](https://github.com/DS4SD/docling-ibm-models/releases/tag/v2.0.5) - 2024-11-20
+
+### Fix
+
+* Removing dependency from mean_average_precision package (not in use) ([#53](https://github.com/DS4SD/docling-ibm-models/issues/53)) ([`65affef`](https://github.com/DS4SD/docling-ibm-models/commit/65affef1f3ff209a8cdae4201aaaad8872d1069b))
+
+## [v2.0.4](https://github.com/DS4SD/docling-ibm-models/releases/tag/v2.0.4) - 2024-11-18
+
+### Fix
+
+* Remove lxml deps ([#51](https://github.com/DS4SD/docling-ibm-models/issues/51)) ([`7a0cbde`](https://github.com/DS4SD/docling-ibm-models/commit/7a0cbde7e0638bbd91d5905ae457fdcb299ee87f))
+
 ## [v2.0.3](https://github.com/DS4SD/docling-ibm-models/releases/tag/v2.0.3) - 2024-10-30
 
 ### Fix
