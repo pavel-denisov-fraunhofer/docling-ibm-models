@@ -13,6 +13,7 @@ import torchvision.transforms as T
 from PIL import Image
 import openvino as ov
 from transformers import RTDetrForObjectDetection, RTDetrImageProcessor
+from transformers.models.rt_detr.modeling_rt_detr import RTDetrObjectDetectionOutput
 
 _log = logging.getLogger(__name__)
 
@@ -80,9 +81,13 @@ class LayoutPredictor:
         if device == "cpu":
             torch.set_num_threads(self._num_threads)
 
+        processor_config = os.path.join(artifact_path, "preprocessor_config.json")
+        self._image_processor = RTDetrImageProcessor.from_json_file(processor_config)
+
         if use_ov:
+            self._st_fn = None
             core = ov.Core()
-            ov_model = core.read_model("openvino_conversion/models/layout_predictor_quantized/model.xml")
+            ov_model = core.read_model("openvino_conversion/models/layout_predictor/model.xml")
             self._model = ov.compile_model(ov_model)
             self._predict_function = self._predict_openvino
         else:
@@ -92,28 +97,21 @@ class LayoutPredictor:
                 raise FileNotFoundError("Missing safe tensors file: {}".format(self._st_fn))
 
             # Load model and move to device
-            processor_config = os.path.join(artifact_path, "preprocessor_config.json")
             model_config = os.path.join(artifact_path, "config.json")
-            self._image_processor = RTDetrImageProcessor.from_json_file(processor_config)
             self._model = RTDetrForObjectDetection.from_pretrained(
                 artifact_path, config=model_config
             ).to(self._device)
-            self._predict_function = self._predict_torch
             self._model.eval()
+            self._predict_function = self._predict_torch
 
         _log.debug("LayoutPredictor settings: {}".format(self.info()))
 
-    def _predict_torch(self, img: torch.Tensor, orig_size: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        with torch.no_grad():
-            labels, boxes, scores = self._model(img, orig_size)
-        return labels, boxes, scores
+    def _predict_torch(self, pixel_values: torch.Tensor) -> RTDetrObjectDetectionOutput:
+        return self._model(pixel_values=pixel_values)
 
-    def _predict_openvino(self, img: torch.Tensor, orig_size: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        output = self._model((img, orig_size))
-        labels = torch.tensor(output[0])
-        boxes = torch.tensor(output[1])
-        scores = torch.tensor(output[2])
-        return labels, boxes, scores
+    def _predict_openvino(self, pixel_values: torch.Tensor) -> RTDetrObjectDetectionOutput:
+        outputs = self._model(pixel_values)
+        return RTDetrObjectDetectionOutput(logits=torch.tensor(outputs[0]), pred_boxes=torch.tensor(outputs[1]))
 
     def info(self) -> dict:
         """
@@ -161,7 +159,7 @@ class LayoutPredictor:
             return_tensors="pt",
             size=resize,
         ).to(self._device)
-        outputs = self._model(**inputs)
+        outputs = self._predict_function(inputs["pixel_values"])
         results = self._image_processor.post_process_object_detection(
             outputs,
             target_sizes=torch.tensor([page_img.size[::-1]]),
